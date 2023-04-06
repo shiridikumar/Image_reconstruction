@@ -67,6 +67,7 @@ class ImagePreprocessor:
                 init_prob = ((num_pixels-temp) /
                              (self.height*self.width-total))
                 j += height
+        print(num_pixels,temp)
 
         for i in range(len(s)):
             image = cv2.line(
@@ -115,22 +116,15 @@ class ImagePreprocessor:
                 self.num_pixels = num_pixels
                 self.avg_corrupt = avg_corrupt
                 
-
-                # corrupt_function =np.vectorize(self.drawLines)
-                # print(self.images.shape[0])
                 corrupted_images=np.array(list(map(lambda x:self.drawLines(self.images[x],linetype),list(range(self.images.shape[0])))))
-                # print(corrupted_images.shape)
                 for i in range(len(corrupted_images)):
                     cv2.imshow(window_name, corrupted_images[i])
                     cv2.waitKey(0)
                 return corrupted_images
         
 
-
-
-
-
 image_paths = ["craters/moon1.png","craters/moon1.png"]
 preprocessor = ImagePreprocessor()
 preprocessor.fit(image_paths)
-corrupted=preprocessor.CorruptImages(2, linetype="v_line")
+corrupted=preprocessor.CorruptImages(100, linetype="v_line")
+
