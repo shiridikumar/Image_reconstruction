@@ -6,11 +6,10 @@ import os
 import numpy as np
 import math
 from PIL import Image
-import skimage
+# import skimage
 import matplotlib.pyplot as plt
-from rasterio.plot import show
+# from rasterio.plot import show
 from osgeo import gdal, ogr
-
 
 
 window_name = 'Image'
@@ -73,6 +72,10 @@ class ImagePreprocessor:
         gap=max(1,int(1/100* self.width))
         # print(gap)
         iter=0
+        dummy=np.zeros((image.shape))
+        # print(image.shape,"##############################")
+        # print(image)
+
         while(temp<num_pixels):
             iter+=1
             if(iter==10):
@@ -110,6 +113,7 @@ class ImagePreprocessor:
 
         for i in range(len(s)):
             # print("-----------",image.shape,"******************")
+            dummy[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=image[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]
             image[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=0
             # image = cv2.line(
                 # image, (s[i][0], s[i][1]), (s[i][0], s[i][2]), color, s[i][-1])
@@ -117,9 +121,12 @@ class ImagePreprocessor:
             # image=cv2.rotate(image,cv2.ROTATE_90_CLOCKWISE)
         if(linetype=="h_line"):
             image=np.rot90(image,axes=(1,2))
+            dummy=np.rot90(dummy,axis=(1,2))
         self.height=image.shape[1]
         self.width=image.shape[2]
-        return image
+        # print("***********")
+        # print(image)
+        return (image,dummy)
 
 
 
@@ -173,14 +180,18 @@ class ImagePreprocessor:
             self.num_pixels = num_pixels
             self.avg_corrupt = avg_corrupt
             
-            corrupted_images=np.array(list(map(lambda x:self.drawLines(self.images[x],self.projection[x],self.geotrans[x],linetype),list(range(self.images.shape[0])))))
+            corrupted_images=list(map(lambda x:self.drawLines(self.images[x],self.projection[x],self.geotrans[x],linetype),list(range(self.images.shape[0]))))
+            dummy_images=np.array(list(map(lambda x: x[1],corrupted_images)))
+            corrupted_images=np.array(list(map(lambda x: x[0],corrupted_images)))
             for i in range(len(corrupted_images)):
                 if("/" in self.paths[i]):
                     filename=self.paths[i].split("/")[-1]
                 else:
                     filename=self.paths[i]
                 
-                self.CreateGeoTiff("new_"+filename,corrupted_images[i],self.geotrans[i],self.projection[i])
+                self.CreateGeoTiff("original_images/new_"+filename,corrupted_images[i]+dummy_images[i],self.geotrans[i],self.projection[i])
+                self.CreateGeoTiff("striped_images/new_"+filename,corrupted_images[i],self.geotrans[i],self.projection[i])
+                self.CreateGeoTiff("dummy_images/new_"+filename,dummy_images[i],self.geotrans[i],self.projection[i])
                 # cv2.imwrite("striped_images/striped_"+filename,corrupted_images[i])
                 # cv2.imshow(window_name, corrupted_images[i])
                 # cv2.waitKey(0)
@@ -202,11 +213,12 @@ class ImagePreprocessor:
 
 "paths could be relative paths or absolute paths"
 dir_path="cropped_images"
-
+# image_paths=[]
 "********************* GIVE THE INPUT OF THE FILENAME/PATH HERE ****************************"
-image_paths=["/home/shiridi/research_work/Lunar_image_reconstruction/To_Uday-san_20220926/Area1_MI_MAP_03_N22E196N21E197SC.tif"]
+image_paths=["cropped_images/cropped_0000_Area1_MI_MAP_03_N22E196N21E197SC.tif"]
 # for filename in sorted(os.listdir(dir_path)):
-    # image_paths.append(dir_path+"/"+filename)
+    # if(filename.endswith(".tif")):
+        # image_paths.append(dir_path+"/"+filename)
     
 print(image_paths)
 
