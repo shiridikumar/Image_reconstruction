@@ -83,4 +83,14 @@
       <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
     </Metadata>
   </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MAXIMUM">22479</MDI>
+      <MDI key="STATISTICS_MEAN">11744.184671487</MDI>
+      <MDI key="STATISTICS_MINIMUM">4079</MDI>
+      <MDI key="STATISTICS_STDDEV">1756.2595706833</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
 </PAMDataset>

@@ -14,6 +14,11 @@ from osgeo import gdal, ogr
 
 window_name = 'Image'
 color = (0, 0, 0)
+try:
+    os.system("rm -rf striped_images")
+except:
+    pass
+os.system("mkdir striped_images")
 
 class ImagePreprocessor:
 
@@ -72,7 +77,8 @@ class ImagePreprocessor:
         gap=max(1,int(1/100* self.width))
         # print(gap)
         iter=0
-        dummy=np.zeros((image.shape))
+        dummy=np.zeros((image.shape),dtype=float)
+        dummy[:,:,:]=2**32 -1
         # print(image.shape,"##############################")
         # print(image)
 
@@ -109,12 +115,15 @@ class ImagePreprocessor:
                     init_prob = ((num_pixels-temp) /
                                 (self.height*self.width-total))
                     j += height
+
         print(num_pixels,temp,"*******")
 
         for i in range(len(s)):
             # print("-----------",image.shape,"******************")
-            dummy[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=image[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]
-            image[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=0
+            # print(dummy.shape,s[i][1],s[i][2],"**************************************************************************")
+            dummy[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=0
+            # print(dummy[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])])
+            image[:,s[i][1]:s[i][2],s[i][0]:(s[i][0]+s[i][-1])]=np.nan
             # image = cv2.line(
                 # image, (s[i][0], s[i][1]), (s[i][0], s[i][2]), color, s[i][-1])
         # if(linetype=="h_line"):
@@ -148,7 +157,7 @@ class ImagePreprocessor:
             
 
         self.images=np.array(self.images)
-        print(self.images.shape)
+        # print(self.images.shape)
 
 
 
@@ -188,11 +197,12 @@ class ImagePreprocessor:
                     filename=self.paths[i].split("/")[-1]
                 else:
                     filename=self.paths[i]
+                # print(np.max(dummy_images[i]),"????????????")
                 
                 self.CreateGeoTiff("original_images/new_"+filename,corrupted_images[i]+dummy_images[i],self.geotrans[i],self.projection[i])
                 self.CreateGeoTiff("striped_images/new_"+filename,corrupted_images[i],self.geotrans[i],self.projection[i])
                 self.CreateGeoTiff("dummy_images/new_"+filename,dummy_images[i],self.geotrans[i],self.projection[i])
-                # cv2.imwrite("striped_images/striped_"+filename,corrupted_images[i])
+                cv2.imwrite("striped_images/striped_"+filename,corrupted_images[i])
                 # cv2.imshow(window_name, corrupted_images[i])
                 # cv2.waitKey(0)
             return corrupted_images
@@ -213,12 +223,12 @@ class ImagePreprocessor:
 
 "paths could be relative paths or absolute paths"
 dir_path="cropped_images"
-# image_paths=[]
+image_paths=[]
 "********************* GIVE THE INPUT OF THE FILENAME/PATH HERE ****************************"
-image_paths=["cropped_images/cropped_0000_Area1_MI_MAP_03_N22E196N21E197SC.tif"]
-# for filename in sorted(os.listdir(dir_path)):
-    # if(filename.endswith(".tif")):
-        # image_paths.append(dir_path+"/"+filename)
+# image_paths=["cropped_images/cropped_0000_Area1_MI_MAP_03_N22E196N21E197SC.tif"]
+for filename in sorted(os.listdir(dir_path)):
+    if(filename.endswith(".tif")):
+        image_paths.append(dir_path+"/"+filename)
     
 print(image_paths)
 
@@ -227,10 +237,10 @@ preprocessor = ImagePreprocessor()
 preprocessor.fit(image_paths)
 
 """
-    The first argumen is percent between 0 to 100 , as of no the algorithtm works
+    The first argument is percent between 0 to 100 , as of no the algorithtm works
     well for percent between 0 to 50% but can try giving 50% above as well.
     The second argument is v_line for vertical lines and h_line for horizontal line
 
 """
-corrupted=preprocessor.CorruptImages(2, linetype="v_line")
+corrupted=preprocessor.CorruptImages(5, linetype="v_line")
 
