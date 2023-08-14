@@ -78,6 +78,7 @@ class FSpanMining:
             if(self.symbol_freq[i]>=self.min_sup):
                 temp.append(chr(ord("A")+i))
         
+        
         return temp
 
     
@@ -131,7 +132,7 @@ class FSpanMining:
         
     def FSpanTree(self,prefix,currdb,fixed_length_w=4):
         root=Node(prefix)
-        root.count=self.min_sup
+        root.count=len(currdb)
         for seq in currdb:
             curr=root
             for i in range(len(seq)):
@@ -144,32 +145,42 @@ class FSpanMining:
                     curr.children.append(new)
 
                 curr=curr.ischild[ord(seq[i])-ord("A")]
+        
+        
 
         return root
 
 
     def dfs(self,prefix,source,currdb,length):
-       
+        # if("#A"==prefix+source.val):
+            # print("*****",source.count)
         if(len(prefix+source.val)>4+length):
             currdb.append((prefix,source))
             return True
         
         # discarded.append((prefix+source.val)
-        self.frequent.update({prefix+source.val[1:]:source.count})
+
+        # if(prefix+source.val not in self.frequent):
+        self.frequent.update({prefix+source.val:source.count})
+ 
+
+
         # print(len(source.chu))
         for i in range(len(source.children)):
             if(source.children[i].count>=self.min_sup):
                 self.dfs(prefix+source.val,source.children[i],currdb,length)
+
 
     
     def mine_pdb(self,candidate,tree,pdbs):
         next_db=[]
         self.dfs("#",tree,next_db,2)
         curr=len(next_db)
-        # print(len(next_db))
+        print(candidate,pdbs[candidate],next_db)
         while(len(next_db)>0):
             temp=[]
             for i in range(len(next_db)):
+
                 self.dfs(next_db[i][0],next_db[i][1],temp,len(next_db[i][0]))
             next_db=temp
         
@@ -182,19 +193,30 @@ class FSpanMining:
         """
         l1=self.getfreqs()
         self.frequent={}
+       
+
+        # print(self.symbol_freq[0])
         pdbs={i:[] for i in l1}
-        for candidate in l1:
-            for seq in data:
-                for j in range(len(seq[1])-1):
-                    if(seq[1][j]==candidate):
-                        pdbs[seq[1][j]].append(seq[1][j+1:])
-            
+        for seq in data:
+            for j in range(len(seq[1])-1):
+                if(self.symbol_freq[ord(seq[1][j])-ord('A')]):
+                    pdbs[seq[1][j]].append(seq[1][j+1:])
+        
 
-
+        for  candidate in l1:
             tree=self.FSpanTree(candidate,pdbs[candidate])
             discarded=[]
             next_db=[]
             self.mine_pdb(candidate,tree,pdbs)
+        
+        self.frequent["#A"]=self.symbol_freq[ord("A")-ord("A")]
+        self.frequent["#G"]=self.symbol_freq[ord("G")-ord("A")]
+        self.frequent["#C"]=self.symbol_freq[ord("C")-ord("A")]
+        self.frequent["#T"]=self.symbol_freq[ord("T")-ord("A")]
+        
+       
+        print(self.frequent)
+        
 
 
 
@@ -210,6 +232,12 @@ for i in data:
 obj = FSpanMining(minsup=150,data=data)
 obj.startMine()
 interestingPatterns = obj.getPatterns()
+# print(interestingPatterns)
+obj.save("res.csv")
+
+
+
+
 # print(interestingPatterns)
 # print("Total number of interesting patterns:", len(interestingPatterns))
 # obj.save("result.csv")

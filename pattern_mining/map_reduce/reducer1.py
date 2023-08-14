@@ -22,4 +22,6 @@ for line in sys.stdin:
 
 if(lno>0 and su>=min_support):
     print('%s\t%s %s' % (1,prev,su))
+
+
     

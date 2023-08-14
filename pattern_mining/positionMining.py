@@ -203,13 +203,13 @@ class PositionMining:
 
 """Driver code"""
 
-df=pd.read_csv("data/D1.csv")
+df=pd.read_csv("data/D2.csv")
 data=df.values[:,1:]
 c=0
 for i in data:
     c+=len(i[1])
 
-obj = PositionMining(minsup=400,data=data)
+obj = PositionMining(minsup=2,data=data)
 obj.startMine()
 interestingPatterns = obj.getPatterns()
 print(interestingPatterns)
