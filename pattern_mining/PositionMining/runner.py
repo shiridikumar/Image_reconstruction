@@ -52,8 +52,6 @@ class MapReduce:
             self.hadoop_commands.append(command)
             command1+=" |  sort | python3 reducer1.py "
         
-            
-        
         # print(command1)
         # os.system(command1)
 
@@ -76,7 +74,7 @@ class MapReduce:
 
 
 
-alg=MapReduce(2,"mapreduce_input.txt",max_length_candidates=3)
+alg=MapReduce(2,"mapreduce_input.txt",max_length_candidates=7)
 alg.startMine()
 
 
